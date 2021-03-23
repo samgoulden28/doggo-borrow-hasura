@@ -1,21 +1,26 @@
-import React, { useState, useEffect, useContext } from 'react';
-import createAuth0Client from '@auth0/auth0-spa-js';
-import Callback from './Callback';
-import Login from './Login';
-import App from '../app';
+import React, { useState, useEffect, useContext } from "react";
+import createAuth0Client from "@auth0/auth0-spa-js";
+import Callback from "./Callback";
+import Login from "./Login";
+import App from "../Components/App/App";
 
-const DEFAULT_REDIRECT_CALLBACK = () => window.history.replaceState({}, document.title, window.location.pathname);
+const DEFAULT_REDIRECT_CALLBACK = () =>
+  window.history.replaceState({}, document.title, window.location.pathname);
 
 export const Auth0Context = React.createContext();
 export const useAuth0 = () => useContext(Auth0Context);
-export const Auth0Provider = ({ children, onRedirectCallback = DEFAULT_REDIRECT_CALLBACK, ...initOptions }) => {
+export const Auth0Provider = ({
+  children,
+  onRedirectCallback = DEFAULT_REDIRECT_CALLBACK,
+  ...initOptions
+}) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState();
   const [auth0Client, setAuth0] = useState();
   const [loading, setLoading] = useState(true);
   const [popupOpen, setPopupOpen] = useState(false);
-  const [idToken, setIdToken] = useState('');
-  const [accessToken, setAccessToken] = useState('');
+  const [idToken, setIdToken] = useState("");
+  const [accessToken, setAccessToken] = useState("");
 
   useEffect(() => {
     const initAuth0 = async () => {
@@ -23,7 +28,7 @@ export const Auth0Provider = ({ children, onRedirectCallback = DEFAULT_REDIRECT_
         const auth0FromHook = await createAuth0Client(initOptions);
         setAuth0(auth0FromHook);
 
-        if (window.location.search.includes('code=')) {
+        if (window.location.search.includes("code=")) {
           // eslint-disable-next-line no-debugger
           const { appState } = await auth0FromHook.handleRedirectCallback();
           onRedirectCallback(appState);
@@ -35,8 +40,6 @@ export const Auth0Provider = ({ children, onRedirectCallback = DEFAULT_REDIRECT_
 
         if (isAuthenticated) {
           const user = await auth0FromHook.getUser();
-          //eslint-disable-next-line no-debugger
-          debugger;
           setUser(user);
           const idTokenClaims = await auth0FromHook.getIdTokenClaims();
           setIdToken(idTokenClaims.__raw);
@@ -44,11 +47,12 @@ export const Auth0Provider = ({ children, onRedirectCallback = DEFAULT_REDIRECT_
           setAccessToken(accessToken);
         }
 
+        console.log("here");
+
         setLoading(false);
       } catch (err) {
         console.log(err);
       }
-      console.log('hi again');
     };
     initAuth0();
     // eslint-disable-next-line
