@@ -1,5 +1,6 @@
 export default {
-  email: "",
   bio: "",
   postcode: "",
+  firstName: "",
+  lastName: "",
 };

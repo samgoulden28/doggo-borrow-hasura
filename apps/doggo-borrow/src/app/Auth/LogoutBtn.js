@@ -1,10 +1,10 @@
 import React from "react";
-import { Button } from "react-bootstrap";
+import { Button } from "@material-ui/core";
 
 const LogoutBtn = ({ logoutHandler }) => (
   <Button
     id="qsLogoutBtn"
-    variant="primary"
+    variant="secondary"
     className="btn-margin logoutBtn"
     onClick={logoutHandler}
   >

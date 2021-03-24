@@ -23,6 +23,49 @@ export const GET_PROFILE_BY_ID = gql`
   query($user_id: String!) {
     profiles(where: { user_id: { _eq: $user_id } }) {
       id
+      name
+      bio
+      postcode
+    }
+  }
+`;
+
+export const UPDATE_PROFILE = gql`
+  mutation($id: Int!, $name: String!, $bio: String!, $postcode: String!) {
+    update_profiles_by_pk(
+      pk_columns: { id: $id }
+      _set: { bio: $bio, name: $name, postcode: $postcode }
+    ) {
+      id
+      name
+      postcode
+      bio
+    }
+  }
+`;
+
+export const ADD_PROFILE = gql`
+  mutation(
+    $user_id: String!
+    $name: String!
+    $bio: String!
+    $postcode: String!
+  ) {
+    insert_profiles(
+      objects: {
+        name: $name
+        postcode: $postcode
+        bio: $bio
+        user_id: $user_id
+      }
+    ) {
+      affected_rows
+      returning {
+        id
+        name
+        postcode
+        bio
+      }
     }
   }
 `;
