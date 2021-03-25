@@ -21,6 +21,8 @@ const Profile = () => {
     variables: { user_id: user.sub },
   });
 
+  console.log(error);
+
   return (
     <Container>
       <Typography>Profile</Typography>

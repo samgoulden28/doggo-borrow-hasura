@@ -15,6 +15,19 @@ export const GET_PROFILES = gql`
       id
       name
       bio
+      postcode
+      type
+      user {
+        users_dogs {
+          dog {
+            name
+            breed
+            birthday
+            bio
+            available
+          }
+        }
+      }
     }
   }
 `;
@@ -26,20 +39,77 @@ export const GET_PROFILE_BY_ID = gql`
       name
       bio
       postcode
+      type
     }
   }
 `;
 
 export const UPDATE_PROFILE = gql`
-  mutation($id: Int!, $name: String!, $bio: String!, $postcode: String!) {
+  mutation(
+    $id: Int!
+    $name: String!
+    $bio: String!
+    $postcode: String!
+    $type: String!
+  ) {
     update_profiles_by_pk(
       pk_columns: { id: $id }
-      _set: { bio: $bio, name: $name, postcode: $postcode }
+      _set: { bio: $bio, name: $name, postcode: $postcode, type: $type }
     ) {
       id
       name
       postcode
       bio
+      type
+    }
+  }
+`;
+
+export const ADD_PROFILE_AND_ADD_DOG = gql`
+  mutation(
+    $user_id: String!
+    $name: String!
+    $bio: String!
+    $postcode: String!
+    $type: String!
+    $dogBio: String!
+    $dogBirthday: date!
+    $dogBreed: String!
+    $dogName: String!
+  ) {
+    insert_users_dogs(
+      objects: {
+        dog: {
+          data: {
+            available: true
+            bio: $dogBio
+            birthday: $dogBirthday
+            breed: $dogBreed
+            name: $dogName
+          }
+        }
+        user_id: $user_id
+      }
+    ) {
+      affected_rows
+    }
+    insert_profiles(
+      objects: {
+        name: $name
+        postcode: $postcode
+        bio: $bio
+        user_id: $user_id
+        type: $type
+      }
+    ) {
+      affected_rows
+      returning {
+        id
+        name
+        postcode
+        bio
+        type
+      }
     }
   }
 `;
@@ -50,13 +120,32 @@ export const ADD_PROFILE = gql`
     $name: String!
     $bio: String!
     $postcode: String!
+    $type: String!
   ) {
     insert_profiles(
       objects: {
-        name: $name
-        postcode: $postcode
-        bio: $bio
-        user_id: $user_id
+        user: {
+          data: {
+            name: $name
+            postcode: $postcode
+            bio: $bio
+            user_id: $user_id
+            type: $type
+            users_dogs: {
+              data: {
+                dog: {
+                  data: {
+                    available: true
+                    bio: $dogBio
+                    birthday: $dogBirthday
+                    breed: $dogBreed
+                    name: $dogName
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     ) {
       affected_rows
@@ -65,6 +154,7 @@ export const ADD_PROFILE = gql`
         name
         postcode
         bio
+        type
       }
     }
   }
