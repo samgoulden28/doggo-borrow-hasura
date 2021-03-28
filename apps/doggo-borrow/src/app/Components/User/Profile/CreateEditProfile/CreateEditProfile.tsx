@@ -11,7 +11,12 @@ import * as yup from "yup";
 import { useQuery } from "@apollo/client";
 import TextField from "@material-ui/core/TextField";
 import formInitialValues from "./formInitialValues";
-import { TextareaAutosize, makeStyles, Typography } from "@material-ui/core";
+import {
+  TextareaAutosize,
+  makeStyles,
+  Typography,
+  DialogActions,
+} from "@material-ui/core";
 import { Button } from "@material-ui/core";
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
@@ -25,6 +30,7 @@ import {
   ADD_PROFILE,
   UPDATE_PROFILE,
   ADD_PROFILE_AND_ADD_DOG,
+  UPDATE_PROFILE_AND_DOG,
 } from "apps/doggo-borrow/src/app/GraphQL/queries";
 import { useMutation } from "@apollo/client";
 import { useAuth0 } from "apps/doggo-borrow/src/app/Auth/react-auth0-spa";
@@ -67,21 +73,44 @@ const CreateEditProfile = () => {
   );
 
   useEffect(() => {
-    console.log(profileLoading, data);
-    if (!profileLoading && data?.profiles?.length) {
-      const {
-        name,
-        bio,
-        postcode,
-        type,
-      }: Record<string, string> = data?.profiles[0];
-      setInitialValues({
-        firstName: name.split(" ")[0],
-        lastName: name.split(" ")[1],
-        bio,
-        postcode,
-        type,
-      });
+    console.log(profileLoading, data?.profiles, data?.dogs);
+    let newInitialValues = {};
+    if (!profileLoading) {
+      if (data?.profiles?.length) {
+        const {
+          name,
+          bio,
+          postcode,
+          type,
+        }: Record<string, string> = data?.profiles[0];
+        newInitialValues = {
+          ...newInitialValues,
+          firstName: name.split(" ")[0],
+          lastName: name.split(" ")[1],
+          bio,
+          postcode,
+          type,
+        };
+      }
+      if (data?.dogs?.length) {
+        const {
+          available,
+          bio,
+          birthday,
+          breed,
+          id,
+          name,
+        }: Record<string, string> = data?.dogs[0];
+        newInitialValues = {
+          ...newInitialValues,
+          dogId: id,
+          dogBio: bio,
+          dogBirthday: birthday,
+          dogBreed: breed,
+          dogName: name,
+        };
+      }
+      setInitialValues(newInitialValues);
     }
   }, [profileLoading, data]);
   const goHome = () => {
@@ -89,10 +118,18 @@ const CreateEditProfile = () => {
   };
 
   const updateCache = (cache, { data }) => {
+    let updateData: { profiles?: any[]; dogs?: any[] } = {};
+    if (data?.update_profiles_by_pk) {
+      updateData.profiles = [data.update_profiles_by_pk];
+    }
+    if (data?.update_dogs_by_pk) {
+      updateData.dogs = [data.update_dogs_by_pk];
+    }
+    console.log(data, updateData);
     cache.writeQuery({
       query: GET_PROFILE_BY_ID,
       variables: { user_id: user.sub },
-      data: { profiles: [data] },
+      data: updateData,
     });
   };
 
@@ -111,6 +148,11 @@ const CreateEditProfile = () => {
     onCompleted: goHome,
   });
 
+  const [updateProfileAndDogs] = useMutation(UPDATE_PROFILE_AND_DOG, {
+    update: updateCache,
+    onCompleted: goHome,
+  });
+
   const handleSubmit = (values) => {
     const isOwner = profileHelpers.isOwner(values.type);
     let variables = {
@@ -121,6 +163,7 @@ const CreateEditProfile = () => {
         type: values.type,
         id: null,
         user_id: null,
+        dogId: isOwner ? values.dogId : null,
         dogBio: isOwner ? values.dogBio : null,
         dogBirthday: isOwner ? values.dogBirthday : null,
         dogBreed: isOwner ? values.dogBreed : null,
@@ -130,10 +173,13 @@ const CreateEditProfile = () => {
 
     if (data?.profiles?.length) {
       variables.variables.id = data?.profiles?.[0]?.id;
-      updateProfile(variables);
+      if (isOwner) {
+        updateProfileAndDogs(variables);
+      } else {
+        updateProfile(variables);
+      }
     } else {
       variables.variables.user_id = user.sub;
-      console.log(variables);
       if (isOwner) {
         addProfileAndDogs(variables);
       } else {

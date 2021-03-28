@@ -41,6 +41,14 @@ export const GET_PROFILE_BY_ID = gql`
       postcode
       type
     }
+    dogs(where: { user_id: { _eq: $user_id } }) {
+      available
+      bio
+      birthday
+      breed
+      id
+      name
+    }
   }
 `;
 
@@ -65,6 +73,46 @@ export const UPDATE_PROFILE = gql`
   }
 `;
 
+export const UPDATE_PROFILE_AND_DOG = gql`
+  mutation(
+    $id: Int!
+    $name: String!
+    $bio: String!
+    $postcode: String!
+    $type: String!
+    $dogId: Int!
+    $dogBio: String!
+    $dogBirthday: date!
+    $dogBreed: String!
+    $dogName: String!
+  ) {
+    update_profiles_by_pk(
+      pk_columns: { id: $id }
+      _set: { bio: $bio, name: $name, postcode: $postcode, type: $type }
+    ) {
+      id
+      name
+      postcode
+      bio
+      type
+    }
+    update_dogs_by_pk(
+      pk_columns: { id: $dogId }
+      _set: {
+        bio: $dogBio
+        name: $dogName
+        breed: $dogBreed
+        birthday: $dogBirthday
+      }
+    ) {
+      bio
+      name
+      breed
+      birthday
+    }
+  }
+`;
+
 export const ADD_PROFILE_AND_ADD_DOG = gql`
   mutation(
     $user_id: String!
@@ -77,17 +125,13 @@ export const ADD_PROFILE_AND_ADD_DOG = gql`
     $dogBreed: String!
     $dogName: String!
   ) {
-    insert_users_dogs(
+    insert_dogs(
       objects: {
-        dog: {
-          data: {
-            available: true
-            bio: $dogBio
-            birthday: $dogBirthday
-            breed: $dogBreed
-            name: $dogName
-          }
-        }
+        available: true
+        bio: $dogBio
+        birthday: $dogBirthday
+        breed: $dogBreed
+        name: $dogName
         user_id: $user_id
       }
     ) {
@@ -124,28 +168,11 @@ export const ADD_PROFILE = gql`
   ) {
     insert_profiles(
       objects: {
-        user: {
-          data: {
-            name: $name
-            postcode: $postcode
-            bio: $bio
-            user_id: $user_id
-            type: $type
-            users_dogs: {
-              data: {
-                dog: {
-                  data: {
-                    available: true
-                    bio: $dogBio
-                    birthday: $dogBirthday
-                    breed: $dogBreed
-                    name: $dogName
-                  }
-                }
-              }
-            }
-          }
-        }
+        name: $name
+        postcode: $postcode
+        bio: $bio
+        user_id: $user_id
+        type: $type
       }
     ) {
       affected_rows

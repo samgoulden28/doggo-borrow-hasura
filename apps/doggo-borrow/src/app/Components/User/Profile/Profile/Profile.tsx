@@ -13,6 +13,7 @@ import { useHistory } from "react-router-dom";
 import { useQuery } from "@apollo/client";
 import { GET_PROFILE_BY_ID } from "../../../../GraphQL/queries";
 import { useAuth0 } from "apps/doggo-borrow/src/app/Auth/react-auth0-spa";
+import profileHelpers from "apps/doggo-borrow/src/utils/helpers/profile_helpers";
 
 const Profile = () => {
   const { user } = useAuth0();
@@ -21,7 +22,7 @@ const Profile = () => {
     variables: { user_id: user.sub },
   });
 
-  console.log(error);
+  console.log(data);
 
   return (
     <Container>
@@ -37,6 +38,22 @@ const Profile = () => {
       ) : (
         <Typography>No profile information to display</Typography>
       )}
+      {!profileLoading &&
+      data?.profiles?.[0] &&
+      profileHelpers.isOwner(data?.profiles?.[0].type) ? (
+        <>
+          <Typography>Dog</Typography>
+          {data?.dogs?.length ? (
+            Object.entries(data.dogs[0]).map(([key, value]) => (
+              <Typography>
+                {key}: {value}
+              </Typography>
+            ))
+          ) : (
+            <Typography>No dogs to display</Typography>
+          )}
+        </>
+      ) : null}
       <Button onClick={() => history.push("/profile/edit")}>
         Edit Profile
       </Button>

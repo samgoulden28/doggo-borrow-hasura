@@ -4,6 +4,7 @@ export default {
   firstName: "",
   lastName: "",
   type: "borrower",
+  dogId: "",
   dogBio: "",
   dogBirthday: "",
   dogBreed: "",
