@@ -121,7 +121,9 @@ const Login = () => {
       >
         {/* Increase the priority of the hero background image */}
         <div className={classes.text}>
-          <Typography variant="h1">Lend a Paw</Typography>
+          <Typography variant="h1" style={{ fontWeight: 700 }}>
+            Lend <span style={{ fontWeight: 300 }}>a</span> Paw
+          </Typography>
           <Typography className={classes.textBody} variant="h5">
             Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent
             eget elementum ex, tincidunt tincidunt felis. Morbi nec porta arcu,
@@ -142,8 +144,6 @@ const Login = () => {
           handleLoginClick={loginWithRedirect}
           showAppBarBackground={showAppBarBackground}
         />
-
-        <div style={{ height: "2000px" }} />
       </div>
       <Grid className={classes.copyBackgroundImage}>
         <img
